@@ -1,5 +1,6 @@
 package me.hycho.demorestapi.events;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,13 +21,17 @@ public class EventController {
 
     private final EventRepository eventRepository;
 
+    private final ModelMapper modelMapper;
+
     /**
      * 이벤트 생성
      * @param event
      * @return
      */
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody Event event){
+    public ResponseEntity createEvent(@RequestBody EventDto eventDto){
+        Event event = modelMapper.map(eventDto, Event.class);
+
         Event result = eventRepository.save(event);
         URI createUri = linkTo(EventController.class).slash(result.getId()).toUri();
         return ResponseEntity.created(createUri).body(event);
