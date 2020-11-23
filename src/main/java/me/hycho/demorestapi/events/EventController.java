@@ -19,7 +19,12 @@ import java.net.URI;
 public class EventController {
 
     private final EventRepository eventRepository;
-    
+
+    /**
+     * 이벤트 생성
+     * @param event
+     * @return
+     */
     @PostMapping
     public ResponseEntity createEvent(@RequestBody Event event){
         Event result = eventRepository.save(event);
