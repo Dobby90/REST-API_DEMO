@@ -26,6 +26,8 @@ public class EventController {
 
     private final ModelMapper modelMapper;
 
+    private final EventValidator eventValidator;
+
     /**
      * 이벤트 생성
      * @param event
@@ -38,10 +40,15 @@ public class EventController {
             return ResponseEntity.badRequest().build();
         };
 
+        eventValidator.validate(eventDto, errors);
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        };
+
         Event event = modelMapper.map(eventDto, Event.class);
         Event result = eventRepository.save(event);
         URI createUri = linkTo(EventController.class).slash(result.getId()).toUri();
-        
+
         return ResponseEntity.created(createUri).body(event);
     }
 }
