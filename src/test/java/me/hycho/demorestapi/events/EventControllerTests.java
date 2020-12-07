@@ -1,13 +1,11 @@
 package me.hycho.demorestapi.events;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -52,6 +50,7 @@ public class EventControllerTests {
     }
 
     @Test
+    @DisplayName("정상적으로 이벤트를 생성하는 테스트")
     public void createEvent() throws Exception {
         EventDto event = EventDto.builder()
                             .name("spring")
@@ -66,8 +65,6 @@ public class EventControllerTests {
                             .location("애플스토어 가로수길점")
                             .build();
 
-        // Mockito.when(eventRepository.save(event)).thenReturn(event);
-
         mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaTypes.HAL_JSON)
@@ -81,6 +78,10 @@ public class EventControllerTests {
                 .andExpect(jsonPath("free").value(false))
                 .andExpect(jsonPath("offline").value(true))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
+                .andExpect(jsonPath("_links.self").exists())
+                // .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
                 ;
     }
 

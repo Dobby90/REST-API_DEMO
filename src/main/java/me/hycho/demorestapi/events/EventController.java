@@ -2,6 +2,7 @@ package me.hycho.demorestapi.events;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import lombok.RequiredArgsConstructor;
 
-import static org.springframework.hateoas.server.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 import java.net.URI;
 
@@ -30,26 +31,34 @@ public class EventController {
 
     /**
      * 이벤트 생성
+     * 
      * @param event
      * @return
      */
     @PostMapping
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
-
-        if(errors.hasErrors()) {
+        /**
+         * Event 도메인은 java Bean스펙을 준수하고 있기 때문에 serializable할 수 있지만 에러 객체는 할 수 없다.
+         */
+        if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors);
-        };
+        }
+        ;
 
         eventValidator.validate(eventDto, errors);
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors);
-        };
+        }
+        ;
 
         Event event = modelMapper.map(eventDto, Event.class);
         event.update();
         Event result = eventRepository.save(event);
-        URI createUri = linkTo(EventController.class).slash(result.getId()).toUri();
-
-        return ResponseEntity.created(createUri).body(event);
+        WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(result.getId());
+        URI createUri = selfLinkBuilder.toUri();
+        EventResource eventResource = new EventResource(event);
+        eventResource.add(linkTo(EventController.class).withRel("query-events"));
+        eventResource.add(selfLinkBuilder.withRel("update-event"));
+        return ResponseEntity.created(createUri).body(eventResource);
     }
 }
