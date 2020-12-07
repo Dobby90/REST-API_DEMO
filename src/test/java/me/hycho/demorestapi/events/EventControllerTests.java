@@ -1,19 +1,18 @@
 package me.hycho.demorestapi.events;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.filter.CharacterEncodingFilter;
 
+import me.hycho.demorestapi.common.RestdocsConfiguration;
 import me.hycho.demorestapi.common.TestDescroption;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -25,8 +24,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureRestDocs
+@Import(RestdocsConfiguration.class)
 public class EventControllerTests {
     
     @Autowired
@@ -35,22 +38,8 @@ public class EventControllerTests {
     @Autowired
     ObjectMapper objectMapper;
 
-    // @MockBean
-    // EventRepository eventRepository;
-
-    @Autowired
-    private WebApplicationContext ctx;
-
-    @BeforeEach
-    public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(ctx)
-                .addFilters(new CharacterEncodingFilter("UTF-8", true))
-                .alwaysDo(print())
-                .build();
-    }
-
     @Test
-    @DisplayName("정상적으로 이벤트를 생성하는 테스트")
+    @DisplayName("정상적으로 이벤트를 생성하는 테스트") // junit5
     public void createEvent() throws Exception {
         EventDto event = EventDto.builder()
                             .name("spring")
@@ -74,19 +63,19 @@ public class EventControllerTests {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/hal+json;charset=UTF-8"))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
                 .andExpect(jsonPath("free").value(false))
                 .andExpect(jsonPath("offline").value(true))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
                 .andExpect(jsonPath("_links.self").exists())
-                // .andExpect(jsonPath("_links.profile").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
+                .andDo(document("create-event"))
                 ;
     }
 
     @Test
-    @TestDescroption("입력 받을 수 없는 값을 사용한 경우에 에러가 발생하는 테스트")
+    @TestDescroption("입력 받을 수 없는 값을 사용한 경우에 에러가 발생하는 테스트") // junit4
     public void createEvent_Bad_Request() throws Exception {
         Event event = Event.builder()
                 .id(100)
