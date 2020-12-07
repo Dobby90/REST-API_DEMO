@@ -46,6 +46,7 @@ public class EventController {
         };
 
         Event event = modelMapper.map(eventDto, Event.class);
+        event.update();
         Event result = eventRepository.save(event);
         URI createUri = linkTo(EventController.class).slash(result.getId()).toUri();
 
