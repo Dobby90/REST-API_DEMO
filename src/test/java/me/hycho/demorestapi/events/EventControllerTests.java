@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import me.hycho.demorestapi.common.RestdocsConfiguration;
@@ -38,6 +39,7 @@ import me.hycho.demorestapi.common.TestDescroption;
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @Import(RestdocsConfiguration.class)
+@ActiveProfiles("test")
 public class EventControllerTests {
 
     @Autowired
