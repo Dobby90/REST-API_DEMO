@@ -40,8 +40,8 @@ public class EventController {
 
     /**
      * 이벤트 생성
-     * 
-     * @param event
+     * @param eventDto
+     * @param errors
      * @return
      */
     @PostMapping
@@ -73,6 +73,12 @@ public class EventController {
         return ResponseEntity.created(createUri).body(eventResource);
     }
 
+    /**
+     * 이벤트 목록 조회
+     * @param pageable
+     * @param assembler
+     * @return
+     */
     @GetMapping
     public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
         Page<Event> page = this.eventRepository.findAll(pageable);
@@ -81,6 +87,11 @@ public class EventController {
         return ResponseEntity.ok(pageResources);
     }
 
+    /**
+     * 이벤트 단건 조회
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public ResponseEntity getEvent(@PathVariable Integer id) {
         Optional<Event> findById = this.eventRepository.findById(id);
@@ -94,6 +105,13 @@ public class EventController {
         return ResponseEntity.ok(eventResource);
     }
 
+    /**
+     * 이벤트 수정
+     * @param id
+     * @param eventDto
+     * @param errors
+     * @return
+     */
     @PutMapping("/{id}")
     public ResponseEntity updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors) {
         Optional<Event> findById = this.eventRepository.findById(id);
@@ -122,4 +140,5 @@ public class EventController {
     private ResponseEntity<ErrorsResource> badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
     }
+    
 }
