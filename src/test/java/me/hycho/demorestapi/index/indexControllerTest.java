@@ -5,25 +5,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
-import me.hycho.demorestapi.common.RestdocsConfiguration;
+import me.hycho.demorestapi.common.BaseTest;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-@Import(RestdocsConfiguration.class)
-@ActiveProfiles("test")
-public class indexControllerTest {
-
-    @Autowired
-    MockMvc mockMvc;
+public class indexControllerTest extends BaseTest {
 
     @Test
     public void index() throws Exception {
