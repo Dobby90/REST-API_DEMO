@@ -11,6 +11,7 @@
 	<groupId>me.hycho</groupId>
 	<artifactId>demo-rest-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 	<name>demo-rest-api</name>
 	<description>Demo project for Spring Boot</description>
 
