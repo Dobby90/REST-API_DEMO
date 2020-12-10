@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import me.hycho.demorestapi.accounts.Account;
 import me.hycho.demorestapi.accounts.AccountRole;
 import me.hycho.demorestapi.accounts.AccountService;
+import me.hycho.demorestapi.common.AppProperties;
 
 @Configuration
 public class AppConfig {
@@ -35,14 +36,24 @@ public class AppConfig {
             @Autowired
             AccountService accountService;
 
+            @Autowired
+            AppProperties appProperties;
+
             @Override
             public void run(ApplicationArguments args) throws Exception {
-                Account account = Account.builder()
-                        .email("hycho@redsoft.co.kr")
-                        .password("hycho")
+                Account admin = Account.builder()
+                        .email(appProperties.getAdminUsername())
+                        .password(appProperties.getAdminPassword())
                         .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
                         .build();
-                this.accountService.saveAccount(account);
+                this.accountService.saveAccount(admin);
+
+                Account user = Account.builder()
+                        .email(appProperties.getUserUsername())
+                        .password(appProperties.getUserPassword())
+                        .roles(Set.of(AccountRole.USER))
+                        .build();
+                this.accountService.saveAccount(user);
             }
         };
     }

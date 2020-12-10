@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
 import org.springframework.test.web.servlet.ResultActions;
 
+import me.hycho.demorestapi.common.AppProperties;
 import me.hycho.demorestapi.common.BaseTest;
 
 public class EventControllerTests extends BaseTest {
@@ -37,16 +38,14 @@ public class EventControllerTests extends BaseTest {
     @Autowired
     EventRepository eventRepository;
 
-    private String getAccessToken() throws Exception {
-        String username = "hycho@redsoft.co.kr";
-        String password = "hycho";
-        String clientId = "myApp";
-        String clientPw = "pass";
+    @Autowired
+    AppProperties appProperties;
 
+    private String getAccessToken() throws Exception {
         ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                                                        .with(httpBasic(clientId, clientPw))
-                                                        .param("username", username)
-                                                        .param("password", password)
+                                                        .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+                                                        .param("username", appProperties.getUserUsername())
+                                                        .param("password", appProperties.getUserPassword())
                                                         .param("grant_type", "password")
                                                     );
 
@@ -54,6 +53,7 @@ public class EventControllerTests extends BaseTest {
         Jackson2JsonParser parser = new Jackson2JsonParser();
         String access_token = parser.parseMap(responseBody).get("access_token").toString();
         return access_token;
+
     }
 
     private String getBearerToken() throws Exception {
