@@ -6,14 +6,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Set;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import me.hycho.demorestapi.accounts.Account;
-import me.hycho.demorestapi.accounts.AccountRole;
 import me.hycho.demorestapi.accounts.AccountService;
 import me.hycho.demorestapi.common.BaseTest;
 
