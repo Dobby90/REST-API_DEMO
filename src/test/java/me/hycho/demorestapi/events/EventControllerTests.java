@@ -204,7 +204,7 @@ public class EventControllerTests extends BaseTest {
     }
 
     @Test
-    @DisplayName("Total=30, pageSize=10, pageNo=2 조회")
+    @DisplayName("이벤트 목록 조회")
     public void queryEvents() throws Exception {
         // Given
         IntStream.range(0, 30).forEach(this::generateEvent);
@@ -227,13 +227,40 @@ public class EventControllerTests extends BaseTest {
     }
 
     @Test
+    @DisplayName("인증 절차를 포함한 이벤트 목록 조회")
+    public void queryEventsWithAuthentication() throws Exception {
+        // Given
+        IntStream.range(0, 30).forEach(this::generateEvent);
+
+        // When & Then
+        this.mockMvc.perform(get("/api/events")
+                                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                                .param("page", "1")
+                                .param("size", "10")
+                                .param("sort", "name,DESC")
+                            )
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andExpect(jsonPath("page").exists())
+                            .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                            .andExpect(jsonPath("_links.self").exists())
+                            .andExpect(jsonPath("_links.profile").exists())
+                            .andExpect(jsonPath("_links.create-event").exists())
+                            .andDo(document("query-events"))
+                            ;
+
+    }
+
+    @Test
     @DisplayName("기존의 이벤트를 1건 조회")
     public void getEvent() throws Exception {
         //Given
         Event event = this.generateEvent(100);
 
         // When & Then
-        this.mockMvc.perform(get("/api/events/{id}", event.getId()))
+        this.mockMvc.perform(get("/api/events/{id}", event.getId())
+                            .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id").exists())
                 .andExpect(jsonPath("name").exists())
@@ -246,7 +273,7 @@ public class EventControllerTests extends BaseTest {
     @DisplayName("없는 이벤트를 조회 했을 경우: 404 응답")
     public void getEvent404() throws Exception {
         // When & Then
-        this.mockMvc.perform(get("/api/events/1205"))
+        this.mockMvc.perform(get("/api/events/1205").header(HttpHeaders.AUTHORIZATION, getBearerToken()))
                 .andExpect(status().isNotFound());
     }
 

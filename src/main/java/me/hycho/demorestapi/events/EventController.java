@@ -14,6 +14,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import lombok.RequiredArgsConstructor;
+import me.hycho.demorestapi.accounts.Account;
+import me.hycho.demorestapi.accounts.CurrentUser;
 import me.hycho.demorestapi.common.ErrorsResource;
 
 @Controller
@@ -45,7 +48,7 @@ public class EventController {
      * @return
      */
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+    public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors, @CurrentUser Account account) {
         /**
          * Event 도메인은 java Bean스펙을 준수하고 있기 때문에 serializable할 수 있지만 에러 객체는 할 수 없다.
          */
@@ -62,6 +65,7 @@ public class EventController {
 
         Event event = modelMapper.map(eventDto, Event.class);
         event.update();
+        event.setManger(account);
         Event result = eventRepository.save(event);
         WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(result.getId());
         URI createUri = selfLinkBuilder.toUri();
@@ -80,10 +84,14 @@ public class EventController {
      * @return
      */
     @GetMapping
-    public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
+    public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler, @CurrentUser Account account) {
         Page<Event> page = this.eventRepository.findAll(pageable);
         var pageResources = assembler.toModel(page, e -> new EventResource(e));    // page Resources 정보
         pageResources.add(new Link("/docs/index.html#resources-events-list").withRel("profile"));
+        if(account != null) {
+            pageResources.add(linkTo(EventController.class).withRel("create-event"));
+        }
+
         return ResponseEntity.ok(pageResources);
     }
 
@@ -93,15 +101,20 @@ public class EventController {
      * @return
      */
     @GetMapping("/{id}")
-    public ResponseEntity getEvent(@PathVariable Integer id) {
+    public ResponseEntity getEvent(@PathVariable Integer id, @CurrentUser Account account) {
         Optional<Event> findById = this.eventRepository.findById(id);
         if(findById.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Event event = findById.get();
+        event.setManger(account);
         EventResource eventResource = new EventResource(event);
         eventResource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
+        if (event.getManger().equals(account)) {
+            eventResource.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
+        }
+
         return ResponseEntity.ok(eventResource);
     }
 
@@ -129,6 +142,7 @@ public class EventController {
         }
 
         Event event = findById.get();
+
         this.modelMapper.map(eventDto, event);  // eventDto -> event Data binding
         Event savedEvent = this.eventRepository.save(event);
         EventResource eventResource = new EventResource(savedEvent);

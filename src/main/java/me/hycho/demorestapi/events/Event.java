@@ -10,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -17,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.hycho.demorestapi.accounts.Account;
+import me.hycho.demorestapi.accounts.AccountSerializer;
 
 @Getter @Setter @Builder
 @AllArgsConstructor @NoArgsConstructor
@@ -41,6 +44,7 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonSerialize(using = AccountSerializer.class)
     private Account manger;
     
 	public void update() {
